@@ -1,71 +1,131 @@
-# Getting Started with Create React App
+# M3 Outfit
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A fashion shopping platform built with React.js, TailwindCSS, Firebase, and Gemini AI.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+**User Features:**
 
-### `npm start`
+- Browse and search for fashion items.
+- View product details.
+- Add items to the shopping cart.
+- Proceed to checkout.
+- User authentication (Login/Register).
+- AI-powered fashion assistant for recommendations and advice.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Admin Features:**
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Admin dashboard.
+- Manage products (add, edit, delete).
+- View and manage orders.
+- Manage users.
+- Settings.
 
-### `npm test`
+## Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Frontend:** React.js, TailwindCSS, Heroicons
+- **Backend:** (Planned/Serverless for API interaction)
+- **Database/Authentication:** Firebase
+- **AI:** Google Gemini API
 
-### `npm run build`
+## Project Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+m3_outfit/
+├── public/
+├── src/
+│   ├── api/              # Serverless functions (for Gemini AI)
+│   ├── assets/           # Static assets (images, fonts, etc.)
+│   ├── components/       # Reusable React components
+│   │   ├── layout/       # Layout components (Navbar, Footer)
+│   │   └── ...
+│   ├── pages/            # Application pages
+│   │   ├── Home.js
+│   │   ├── ProductDetails.js
+│   │   ├── Cart.js
+│   │   ├── Login.js
+│   │   ├── Register.js
+│   │   ├── AdminPanel.js
+│   │   └── ...
+│   ├── App.js            # Main application component
+│   ├── index.js          # Entry point
+│   └── ...
+├── tailwind.config.js    # Tailwind CSS configuration
+├── .env.local            # Environment variables (for local development - **do not commit sensitive keys!**)
+├── package.json
+├── README.md             # Project README
+└── ...
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Setup and Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository_url>
+    cd m3_outfit
+    ```
 
-### `npm run eject`
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+    or if you are using yarn:
+    ```bash
+    yarn install
+    ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3.  **Set up Firebase:**
+    - Create a Firebase project on the [Firebase Console](https://console.firebase.google.com/).
+    - Set up Firebase Authentication and other services you plan to use (e.g., Firestore, Storage).
+    - Get your Firebase configuration object.
+    - Create a `.env.local` file in the project root (if it doesn't exist) and add your Firebase configuration as environment variables. For example:
+      ```env
+      REACT_APP_FIREBASE_API_KEY=YOUR_API_KEY
+      REACT_APP_FIREBASE_AUTH_DOMAIN=YOUR_AUTH_DOMAIN
+      REACT_APP_FIREBASE_PROJECT_ID=YOUR_PROJECT_ID
+      REACT_APP_FIREBASE_STORAGE_BUCKET=YOUR_STORAGE_BUCKET
+      REACT_APP_FIREBASE_MESSAGING_SENDER_ID=YOUR_MESSAGING_SENDER_ID
+      REACT_APP_FIREBASE_APP_ID=YOUR_APP_ID
+      REACT_APP_FIREBASE_MEASUREMENT_ID=YOUR_MEASUREMENT_ID
+      ```
+      Replace the placeholder values with your actual Firebase configuration.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4.  **Set up Gemini API (for AI Assistant):**
+    - Get your Gemini API key from the Google AI Studio or Google Cloud Console.
+    - **Crucially, for production deployment, you must set this API key as an environment variable on your serverless hosting platform (e.g., Vercel, Netlify).** The serverless function in `api/gemini.js` reads the API key from `process.env.GEMINI_API_KEY`.
+    - For **local development**, you can also add `GEMINI_API_KEY=YOUR_GEMINI_API_KEY` to your `.env.local` file, but be extremely cautious not to commit this file to your repository if it contains sensitive keys.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Running the Application
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1.  **Start the local development server:**
+    If you are using a serverless platform CLI (like Vercel CLI):
+    ```bash
+    vercel dev
+    ```
+    If you are running a standard React development server (without local serverless simulation - AI assistant will not work):  
+    ```bash
+    npm start
+    ```
+    or
+    ```bash
+    yarn start
+    ```
 
-## Learn More
+2.  Open your browser and visit `http://localhost:3000` (or the address provided by your CLI).
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Deployment
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+This project is structured to be easily deployable to serverless platforms like Vercel or Netlify.
 
-### Code Splitting
+1.  Push your code to a Git repository.
+2.  Connect your repository to your chosen serverless platform.
+3.  Configure the `GEMINI_API_KEY` environment variable (and any Firebase environment variables if required by your setup) in the platform's settings.
+4.  Deploy your project.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Contributing
 
-### Analyzing the Bundle Size
+(Add contributing guidelines here if applicable)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## License
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# m3outfit
+(Add license information here) 
