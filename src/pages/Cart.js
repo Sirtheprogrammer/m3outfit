@@ -66,6 +66,10 @@ const Cart = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  const formatPrice = (price) => {
+    return `TZS ${parseFloat(price).toLocaleString()}`;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -113,7 +117,7 @@ const Cart = () => {
                             {item.name}
                           </h2>
                         </Link>
-                        <p className="text-gray-600 mt-1">${item.price}</p>
+                        <p className="text-gray-600 mt-1">{formatPrice(item.price)}</p>
                       </div>
 
                       {/* Quantity Controls */}
@@ -156,7 +160,7 @@ const Cart = () => {
               <div className="space-y-4">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>{formatPrice(calculateTotal())}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
@@ -165,7 +169,7 @@ const Cart = () => {
                 <div className="border-t pt-4">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
-                    <span>${calculateTotal().toFixed(2)}</span>
+                    <span>{formatPrice(calculateTotal())}</span>
                   </div>
                 </div>
                 <button

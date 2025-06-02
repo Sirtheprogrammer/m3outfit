@@ -21,6 +21,7 @@ import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 import Admin from './pages/Admin';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProductDetail from './pages/ProductDetail';
 
 function App() {
   return (
@@ -31,11 +32,9 @@ function App() {
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/product/:id" element={<ProductDetails />} />
               <Route path="/products" element={<Products />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/categories" element={<Categories />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
               <Route path="/cart" element={
                 <ProtectedRoute>
                   <Cart />
@@ -61,6 +60,8 @@ function App() {
                   <Admin />
                 </ProtectedRoute>
               } />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
             </Routes>
           </main>
           <Footer />

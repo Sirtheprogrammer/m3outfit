@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Link, useSearchParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -9,11 +10,7 @@ const Products = () => {
   const [searchParams] = useSearchParams();
   const categoryId = searchParams.get('category');
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       let q = collection(db, 'products');
       
@@ -28,13 +25,24 @@ const Products = () => {
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort products client-side if category is selected
+      if (categoryId) {
+        productsList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
+      
       setProducts(productsList);
     } catch (error) {
       console.error('Error fetching products:', error);
+      toast.error('Failed to fetch products');
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   if (loading) {
     return (
@@ -65,7 +73,7 @@ const Products = () => {
               <h2 className="text-xl font-semibold text-gray-800">{product.name}</h2>
               <p className="text-gray-600 mt-2 line-clamp-2">{product.description}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-xl font-bold text-primary">${product.price}</span>
+                <span className="text-xl font-bold text-primary">TZS {parseFloat(product.price).toLocaleString()}</span>
                 <button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors duration-300">
                   Add to Cart
                 </button>
