@@ -1,13 +1,61 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   UserPlusIcon,
-  UserIcon,
   LockClosedIcon,
   EnvelopeIcon,
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { registerUser, loginWithGoogle } from '../firebase/index';
+import { toast } from 'react-toastify';
 
 const Register = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await registerUser(email, password);
+      toast.success('Account created successfully!');
+      navigate('/');
+    } catch (error) {
+      setError(error.message);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      await loginWithGoogle();
+      toast.success('Account created successfully with Google!');
+      navigate('/');
+    } catch (error) {
+      setError(error.message);
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -18,27 +66,12 @@ const Register = () => {
           </h2>
         </div>
         
-        <form className="mt-8 space-y-6">
+        {error && <p className="text-red-600 text-center">{error}</p>}
+        
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="full-name" className="sr-only">Full name</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <UserIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="full-name"
-                  name="full-name"
-                  type="text"
-                  required
-                  className="appearance-none rounded-md relative block w-full pl-10 py-3 border border-gray-300 placeholder-gray-500 text-dark focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                  placeholder="Full name"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email address</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <EnvelopeIcon className="h-5 w-5 text-gray-400" />
@@ -48,6 +81,8 @@ const Register = () => {
                   name="email"
                   type="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="appearance-none rounded-md relative block w-full pl-10 py-3 border border-gray-300 placeholder-gray-500 text-dark focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Email address"
                 />
@@ -55,7 +90,7 @@ const Register = () => {
             </div>
             
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <LockClosedIcon className="h-5 w-5 text-gray-400" />
@@ -65,6 +100,8 @@ const Register = () => {
                   name="password"
                   type="password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="appearance-none rounded-md relative block w-full pl-10 py-3 border border-gray-300 placeholder-gray-500 text-dark focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Password"
                 />
@@ -72,7 +109,7 @@ const Register = () => {
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className="sr-only">Confirm password</label>
+              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">Confirm Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <LockClosedIcon className="h-5 w-5 text-gray-400" />
@@ -82,6 +119,8 @@ const Register = () => {
                   name="confirm-password"
                   type="password"
                   required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   className="appearance-none rounded-md relative block w-full pl-10 py-3 border border-gray-300 placeholder-gray-500 text-dark focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                   placeholder="Confirm password"
                 />
@@ -92,12 +131,13 @@ const Register = () => {
           <div>
             <button
               type="submit"
+              disabled={loading}
               className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 <ArrowRightOnRectangleIcon className="h-5 w-5 text-white group-hover:text-white" />
               </span>
-              Create Account
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </div>
         </form>
@@ -114,8 +154,9 @@ const Register = () => {
 
           <div className="mt-6">
             <button
-              type="button"
-              className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              onClick={handleGoogleSignUp}
+              disabled={loading}
+              className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             >
               <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -123,7 +164,7 @@ const Register = () => {
                   fill="#4285F4"
                 />
               </svg>
-              Sign up with Google
+              {loading ? 'Creating Account...' : 'Sign up with Google'}
             </button>
           </div>
         </div>

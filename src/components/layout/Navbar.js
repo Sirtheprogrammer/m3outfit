@@ -1,107 +1,46 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
-import { 
-  HomeIcon, 
-  ShoppingBagIcon, 
-  ShoppingCartIcon, 
-  UserIcon,
-  Bars3Icon,
-  XMarkIcon
-} from '@heroicons/react/24/outline';
+import { useAuth } from '../../context/AuthContext';
+import Profile from '../Profile';
+import { ShoppingCartIcon } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <nav className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20">
+        <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center space-x-3">
-              <img
-                src="https://i.ibb.co/tTXNZ4ML/Simple-M-Letter-Logo-1.jpg"
-                alt="M3 Outfit Logo"
-                className="h-12 w-12 object-contain rounded-full ring-2 ring-primary/20"
-              />
-              <span className="text-2xl font-bold text-primary tracking-wider">M3 OUTFIT</span>
+            <Link to="/" className="text-2xl font-bold text-primary">
+              M3 Outfit
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-dark hover:text-primary font-medium flex items-center space-x-1">
-              <HomeIcon className="h-5 w-5" />
-              <span>HOME</span>
-            </Link>
-            <Link to="/products" className="text-dark hover:text-primary font-medium flex items-center space-x-1">
-              <ShoppingBagIcon className="h-5 w-5" />
-              <span>PRODUCTS</span>
-            </Link>
-            <Link to="/cart" className="text-dark hover:text-primary font-medium flex items-center space-x-1">
-              <ShoppingCartIcon className="h-5 w-5" />
-              <span>CART</span>
-            </Link>
-            <Link to="/login" className="btn btn-primary font-medium flex items-center space-x-1">
-              <UserIcon className="h-5 w-5" />
-              <span>LOGIN</span>
-            </Link>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-dark hover:text-primary focus:outline-none"
-            >
-              {isMenuOpen ? (
-                <XMarkIcon className="h-6 w-6" />
-              ) : (
-                <Bars3Icon className="h-6 w-6" />
-              )}
-            </button>
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <>
+                <Link
+                  to="/cart"
+                  className="relative p-2 text-gray-600 hover:text-primary"
+                >
+                  <ShoppingCartIcon className="h-6 w-6" />
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-primary rounded-full">
+                    0
+                  </span>
+                </Link>
+                <Profile />
+              </>
+            ) : (
+              <Link
+                to="/login"
+                className="text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link
-              to="/"
-              className="block px-3 py-2 rounded-md text-dark hover:text-primary font-medium flex items-center space-x-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <HomeIcon className="h-5 w-5" />
-              <span>HOME</span>
-            </Link>
-            <Link
-              to="/products"
-              className="block px-3 py-2 rounded-md text-dark hover:text-primary font-medium flex items-center space-x-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <ShoppingBagIcon className="h-5 w-5" />
-              <span>PRODUCTS</span>
-            </Link>
-            <Link
-              to="/cart"
-              className="block px-3 py-2 rounded-md text-dark hover:text-primary font-medium flex items-center space-x-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <ShoppingCartIcon className="h-5 w-5" />
-              <span>CART</span>
-            </Link>
-            <Link
-              to="/login"
-              className="block px-3 py-2 rounded-md text-dark hover:text-primary font-medium flex items-center space-x-2"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <UserIcon className="h-5 w-5" />
-              <span>LOGIN</span>
-            </Link>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };
