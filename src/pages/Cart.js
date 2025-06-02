@@ -1,113 +1,185 @@
-import React from 'react';
-import { ShoppingCartIcon, CreditCardIcon, TruckIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { TrashIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 const Cart = () => {
-  // Placeholder for cart items - replace with actual state/data later
-  const cartItems = []; 
+  const { user } = useAuth();
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Placeholder for order summary - replace with actual calculations later
-  const subtotal = 0.00;
-  const shipping = 0.00; // Example fixed shipping
-  const tax = 0.00; // Example fixed tax
-  const total = subtotal + shipping + tax;
+  useEffect(() => {
+    if (user) {
+      fetchCartItems();
+    }
+  }, [user]);
+
+  const fetchCartItems = async () => {
+    try {
+      const cartDoc = await getDocs(collection(db, 'carts', user.uid, 'items'));
+      const items = cartDoc.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setCartItems(items);
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+      toast.error('Failed to fetch cart items');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateQuantity = async (itemId, newQuantity) => {
+    if (newQuantity < 1) return;
+    
+    try {
+      await updateDoc(doc(db, 'carts', user.uid, 'items', itemId), {
+        quantity: newQuantity
+      });
+      fetchCartItems();
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      toast.error('Failed to update quantity');
+    }
+  };
+
+  const removeFromCart = async (itemId) => {
+    try {
+      await deleteDoc(doc(db, 'carts', user.uid, 'items', itemId));
+      toast.success('Item removed from cart');
+      fetchCartItems();
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      toast.error('Failed to remove item');
+    }
+  };
+
+  const calculateTotal = () => {
+    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto mt-10">
-      <div className="flex shadow-md my-10">
-        <div className="w-3/4 bg-white px-10 py-10">
-          <div className="flex justify-between border-b pb-8">
-            <h1 className="font-semibold text-2xl text-dark flex items-center">
-              <ShoppingCartIcon className="h-7 w-7 mr-2" />
-              Shopping Cart
-            </h1>
-            <h2 className="font-semibold text-2xl text-dark">{cartItems.length} Items</h2>
-          </div>
-          <div className="flex mt-10 mb-5">
-            <h3 className="font-semibold text-gray-600 text-xs uppercase w-2/5">Product Details</h3>
-            <h3 className="font-semibold text-center text-gray-600 text-xs uppercase w-1/5">Quantity</h3>
-            <h3 className="font-semibold text-center text-gray-600 text-xs uppercase w-1/5">Price</h3>
-            <h3 className="font-semibold text-center text-gray-600 text-xs uppercase w-1/5">Total</h3>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+      
+      {cartItems.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-lg shadow-md">
+          <p className="text-gray-600 mb-4">Your cart is empty</p>
+          <Link
+            to="/products"
+            className="inline-block bg-primary text-white px-6 py-2 rounded-md hover:bg-primary-dark transition-colors duration-300"
+          >
+            Continue Shopping
+          </Link>
+        </div>
+      ) : (
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Cart Items */}
+          <div className="flex-1">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="divide-y divide-gray-200">
+                {cartItems.map((item) => (
+                  <div key={item.id} className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                      {/* Product Image */}
+                      <Link to={`/product/${item.id}`} className="w-full sm:w-24 h-24 flex-shrink-0">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                      </Link>
 
-          {cartItems.length === 0 ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center text-gray-500">
-                 <ShoppingCartIcon className="h-16 w-16 mx-auto mb-4" />
-                Your cart is empty.
+                      {/* Product Details */}
+                      <div className="flex-1 min-w-0">
+                        <Link to={`/product/${item.id}`} className="block">
+                          <h2 className="text-lg font-semibold text-gray-800 truncate">
+                            {item.name}
+                          </h2>
+                        </Link>
+                        <p className="text-gray-600 mt-1">${item.price}</p>
+                      </div>
+
+                      {/* Quantity Controls */}
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="p-1 rounded-full hover:bg-gray-100"
+                        >
+                          <MinusIcon className="h-5 w-5 text-gray-600" />
+                        </button>
+                        <span className="text-gray-800 font-medium w-8 text-center">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          className="p-1 rounded-full hover:bg-gray-100"
+                        >
+                          <PlusIcon className="h-5 w-5 text-gray-600" />
+                        </button>
+                      </div>
+
+                      {/* Remove Button */}
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        className="p-2 text-red-600 hover:text-red-800"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ) : (
-            {/* Cart items go here */}
-            // Example Cart Item Structure:
-            // <div className="flex items-center hover:bg-gray-100 -mx-8 px-6 py-5">
-            //   <div className="flex w-2/5">
-            //     {/* Product Image */}
-            //     <div className="w-20">
-            //       <img className="h-24" src="product-image-url.jpg" alt="Product" />
-            //     </div>
-            //     {/* Product Details */}
-            //     <div className="flex flex-col justify-between ml-4 flex-grow">
-            //       <span className="font-bold text-sm">Product Name</span>
-            //       <span className="text-red-500 text-xs">Category</span>
-            //       <button className="font-semibold hover:text-red-500 text-gray-500 text-xs text-left flex items-center">
-            //         <TrashIcon className="h-4 w-4 mr-1" />Remove
-            //       </button>
-            //     </div>
-            //   </div>
-            //   {/* Quantity Input */}
-            //   <div className="flex justify-center w-1/5">
-            //     <input className="mx-2 border text-center w-8" type="text" value="1" />
-            //   </div>
-            //   {/* Price */}
-            //   <span className="text-center w-1/5 font-semibold text-sm">$XX.XX</span>
-            //   {/* Total */} 
-            //   <span className="text-center w-1/5 font-semibold text-sm">$XX.XX</span>
-            // </div>
-          )}
+          </div>
 
-          <a href="#" className="flex font-semibold text-primary text-sm mt-10">
-            <svg className="fill-current mr-2 text-primary w-4" viewBox="0 0 448 512">
-              <path d="M134.059 296H436c6.627 0 12-5.373 12-12v-56c0-6.627-5.373-12-12-12H134.059v-46.059c0-21.382-25.851-32.09-40.971-16.971L7.029 239.029c-9.373 9.373-9.373 24.569 0 33.941L93.088 331.03c15.12 15.12 40.971 4.411 40.971-16.971V296z"/>
-            </svg>
-            Continue Shopping
-          </a>
-        </div>
-
-        <div id="summary" className="w-1/4 px-8 py-10 bg-gray-100">
-          <h1 className="font-semibold text-2xl border-b pb-8 text-dark flex items-center">
-             <CreditCardIcon className="h-7 w-7 mr-2" />Order Summary
-          </h1>
-          <div className="flex justify-between mt-10 mb-5">
-            <span className="font-semibold text-sm uppercase">Items {cartItems.length}</span>
-            <span className="font-semibold text-sm">${subtotal.toFixed(2)}</span>
-          </div>
-          <div>
-            <label className="font-medium inline-block mb-3 text-sm uppercase flex items-center">
-               <TruckIcon className="h-5 w-5 mr-2" />Shipping
-            </label>
-            {/* Shipping options would go here */}
-            <select className="block p-2 text-gray-600 w-full text-sm">
-              <option>Standard shipping - $0.00</option>
-            </select>
-          </div>
-          <div className="py-10">
-            <label htmlFor="promo" className="font-semibold inline-block mb-3 text-sm uppercase">Promo Code</label>
-            <input type="text" id="promo" placeholder="Enter your code" className="p-2 text-sm w-full" />
-          </div>
-          <button className="bg-primary hover:bg-secondary px-5 py-2 text-sm text-white uppercase">Apply</button>
-          <div className="border-t mt-8">
-            <div className="flex font-semibold justify-between py-6 text-sm uppercase">
-              <span>Total cost</span>
-              <span>${total.toFixed(2)}</span>
+          {/* Order Summary */}
+          <div className="lg:w-96">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
+              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              <div className="space-y-4">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span>${calculateTotal().toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Shipping</span>
+                  <span>Free</span>
+                </div>
+                <div className="border-t pt-4">
+                  <div className="flex justify-between font-semibold text-lg">
+                    <span>Total</span>
+                    <span>${calculateTotal().toFixed(2)}</span>
+                  </div>
+                </div>
+                <button
+                  className="w-full bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors duration-300"
+                >
+                  Proceed to Checkout
+                </button>
+                <Link
+                  to="/products"
+                  className="block text-center text-primary hover:text-primary-dark"
+                >
+                  Continue Shopping
+                </Link>
+              </div>
             </div>
-            <button className="bg-primary font-semibold hover:bg-secondary py-3 text-sm text-white uppercase w-full flex items-center justify-center">
-              <CreditCardIcon className="h-5 w-5 mr-2" />
-              Proceed to Checkout
-            </button>
           </div>
         </div>
-
-      </div>
+      )}
     </div>
   );
 };

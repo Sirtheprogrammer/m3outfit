@@ -8,8 +8,9 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return isAuthenticated() && 
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+      // Assumes the user's UID exists as a document ID in the 'admins' collection
+      // and that the rule below allows authenticated users to read their own admin document.
+      return isAuthenticated() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
     
     function isOwner(userId) {
@@ -53,8 +54,9 @@ service cloud.firestore {
     }
 
     // Admins collection rules
+    // Allow authenticated users to read their own admin document, but only admins can write.
     match /admins/{adminId} {
-      allow read: if isAdmin();
+      allow read: if isAuthenticated() && request.auth.uid == adminId;
       allow write: if isAdmin();
     }
 
