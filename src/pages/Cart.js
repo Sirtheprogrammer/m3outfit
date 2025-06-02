@@ -17,6 +17,10 @@ const Cart = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    fetchCartItems();
+  }, [fetchCartItems]);
+
   const fetchCartItems = async () => {
     try {
       const cartDoc = await getDocs(collection(db, 'carts', user.uid, 'items'));

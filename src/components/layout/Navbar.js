@@ -9,7 +9,8 @@ import {
   HomeIcon,
   ShoppingBagIcon,
   HeartIcon,
-  UserIcon
+  UserIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
@@ -69,6 +70,15 @@ const Navbar = () => {
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
+                  {user.isAdmin && (
+                    <Link
+                      to="/admin"
+                      className="hidden md:flex items-center px-3 py-2 text-sm font-medium text-primary hover:text-primary-dark"
+                    >
+                      <Cog6ToothIcon className="h-5 w-5 mr-1" />
+                      Admin Panel
+                    </Link>
+                  )}
                   <Link
                     to="/wishlist"
                     className="text-gray-600 hover:text-primary p-2"
@@ -140,6 +150,18 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
+
+            {/* Mobile Admin Link */}
+            {user?.isAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center px-4 py-2 text-base font-medium text-primary hover:bg-gray-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Cog6ToothIcon className="h-5 w-5 mr-2" />
+                Admin Panel
+              </Link>
+            )}
 
             {/* Mobile User Actions */}
             {!user && (

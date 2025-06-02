@@ -13,7 +13,7 @@ const Orders = () => {
     if (user) {
       fetchOrders();
     }
-  }, [user]);
+  }, [user, fetchOrders]);
 
   const fetchOrders = async () => {
     try {

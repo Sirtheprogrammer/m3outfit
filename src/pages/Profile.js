@@ -20,6 +20,10 @@ const Profile = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   const fetchProfile = async () => {
     try {
       const userDoc = await getDoc(doc(db, 'users', user.uid));

@@ -11,7 +11,7 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [categoryId]);
+  }, [fetchProducts]);
 
   const fetchProducts = async () => {
     try {
@@ -19,9 +19,9 @@ const Products = () => {
       
       if (categoryId) {
         q = query(q, where('category', '==', categoryId));
+      } else {
+        q = query(q, orderBy('createdAt', 'desc'));
       }
-      
-      q = query(q, orderBy('createdAt', 'desc'));
       
       const querySnapshot = await getDocs(q);
       const productsList = querySnapshot.docs.map(doc => ({

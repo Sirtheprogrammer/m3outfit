@@ -14,7 +14,7 @@ const Wishlist = () => {
     if (user) {
       fetchWishlist();
     }
-  }, [user]);
+  }, [user, fetchWishlist]);
 
   const fetchWishlist = async () => {
     try {

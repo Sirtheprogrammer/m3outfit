@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { logoutUser } from '../firebase/index';
 import { toast } from 'react-toastify';
+import { 
+  UserIcon, 
+  ShoppingBagIcon, 
+  HeartIcon, 
+  ArrowRightOnRectangleIcon,
+  Cog6ToothIcon
+} from '@heroicons/react/24/outline';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -40,8 +47,9 @@ const Profile = () => {
               navigate('/profile');
               setIsOpen(false);
             }}
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
+            <UserIcon className="h-5 w-5 mr-2" />
             My Profile
           </button>
           <button
@@ -49,8 +57,9 @@ const Profile = () => {
               navigate('/orders');
               setIsOpen(false);
             }}
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
+            <ShoppingBagIcon className="h-5 w-5 mr-2" />
             My Orders
           </button>
           <button
@@ -58,14 +67,28 @@ const Profile = () => {
               navigate('/wishlist');
               setIsOpen(false);
             }}
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
           >
+            <HeartIcon className="h-5 w-5 mr-2" />
             Wishlist
           </button>
+          {user?.isAdmin && (
+            <button
+              onClick={() => {
+                navigate('/admin');
+                setIsOpen(false);
+              }}
+              className="flex items-center w-full text-left px-4 py-2 text-sm text-primary hover:bg-gray-100"
+            >
+              <Cog6ToothIcon className="h-5 w-5 mr-2" />
+              Admin Panel
+            </button>
+          )}
           <button
             onClick={handleLogout}
-            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+            className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
           >
+            <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2" />
             Logout
           </button>
         </div>
