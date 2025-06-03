@@ -61,7 +61,7 @@ m3_outfit/
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository_url>
+    git clone https://github.com/sirtheprogrammer/m3_outfit.git
     cd m3_outfit
     ```
 
@@ -128,4 +128,5 @@ This project is structured to be easily deployable to serverless platforms like 
 
 ## License
 
-(Add license information here) 
+MIT
+#sirtheprogrammer
