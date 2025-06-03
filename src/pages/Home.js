@@ -105,14 +105,19 @@ const Home = () => {
   };
 
   const handlePageChange = (page) => {
+    // First scroll to top immediately
+    window.scrollTo(0, 0);
+    
+    // Then update the page
     setCurrentPage(page);
-    // Scroll to the products section with smooth behavior
-    const productsSection = document.querySelector('.products-section');
-    if (productsSection) {
-      productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    
+    // Finally, scroll to the products section with smooth behavior
+    setTimeout(() => {
+      const productsSection = document.querySelector('.products-section');
+      if (productsSection) {
+        productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   // Calculate pagination values
