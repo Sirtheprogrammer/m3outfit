@@ -9,15 +9,29 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const categoryId = searchParams.get('category');
+  const [categories, setCategories] = useState([]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'categories'));
+      const categoriesList = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setCategories(categoriesList);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast.error('Failed to fetch categories');
+    }
+  }, []);
 
   const fetchProducts = useCallback(async () => {
     try {
+      setLoading(true);
       let q = collection(db, 'products');
       
       if (categoryId) {
         q = query(q, where('category', '==', categoryId));
-      } else {
-        q = query(q, orderBy('createdAt', 'desc'));
       }
       
       const querySnapshot = await getDocs(q);
@@ -26,10 +40,8 @@ const Products = () => {
         ...doc.data()
       }));
       
-      // Sort products client-side if category is selected
-      if (categoryId) {
-        productsList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      }
+      // Sort products by creation date
+      productsList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       
       setProducts(productsList);
     } catch (error) {
@@ -42,7 +54,13 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
+
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.name : 'Unknown Category';
+  };
 
   if (loading) {
     return (
@@ -54,34 +72,55 @@ const Products = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Products</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <Link
-            key={product.id}
-            to={`/product/${product.id}`}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
-          >
-            <div className="aspect-w-1 aspect-h-1">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="object-cover w-full h-64"
-              />
-            </div>
-            <div className="p-4">
-              <h2 className="text-xl font-semibold text-gray-800">{product.name}</h2>
-              <p className="text-gray-600 mt-2 line-clamp-2">{product.description}</p>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-xl font-bold text-primary">TZS {parseFloat(product.price).toLocaleString()}</span>
-                <button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors duration-300">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </Link>
-        ))}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">
+          {categoryId ? `${getCategoryName(categoryId)} Products` : 'All Products'}
+        </h1>
+        <Link
+          to="/products"
+          className={`text-primary hover:text-primary-dark ${!categoryId ? 'hidden' : ''}`}
+        >
+          View All Products
+        </Link>
       </div>
+
+      {products.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">
+            {categoryId ? 'No products found in this category.' : 'No products available.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <Link
+              key={product.id}
+              to={`/product/${product.id}`}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+            >
+              <div className="aspect-w-1 aspect-h-1">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="object-cover w-full h-64"
+                />
+              </div>
+              <div className="p-4">
+                <h2 className="text-xl font-semibold text-gray-800">{product.name}</h2>
+                <p className="text-gray-600 mt-2 line-clamp-2">{product.description}</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <span className="text-xl font-bold text-primary">
+                    TZS {parseFloat(product.price).toLocaleString()}
+                  </span>
+                  <button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors duration-300">
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

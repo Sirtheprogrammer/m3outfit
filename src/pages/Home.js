@@ -31,21 +31,21 @@ const Home = () => {
     const fetchProducts = async () => {
       setLoadingProducts(true);
       try {
-        console.log('Fetching products...', selectedCategory);
         let q = collection(db, 'products');
 
         if (selectedCategory) {
           q = query(q, where('category', '==', selectedCategory));
         }
 
-        q = query(q, orderBy('createdAt', 'desc'));
-
         const querySnapshot = await getDocs(q);
         const productsList = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
-        console.log('Products fetched:', productsList);
+
+        // Sort products by creation date on the client side
+        productsList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
         setProducts(productsList);
         setError('');
       } catch (error) {
@@ -81,7 +81,7 @@ const Home = () => {
   }, []);
 
   const formatPriceInTZS = (price) => {
-    return `TZS ${parseFloat(price).toFixed(2)}`;
+    return `TZS ${parseFloat(price).toLocaleString()}`;
   };
 
   const handleCategoryClick = (categoryId) => {
