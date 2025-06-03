@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { collection, getDocs, doc } from 'firebase/firestore';
+import { db } from '../../firebase';
 import Profile from '../Profile';
 import { 
   ShoppingCartIcon, 
@@ -10,12 +12,32 @@ import {
   ShoppingBagIcon,
   HeartIcon,
   UserIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      if (!user) return;
+      
+      try {
+        const cartRef = doc(db, 'carts', user.uid);
+        const itemsRef = collection(cartRef, 'items');
+        const itemsSnapshot = await getDocs(itemsRef);
+        setCartCount(itemsSnapshot.size);
+      } catch (error) {
+        console.error('Error fetching cart count:', error);
+      }
+    };
+
+    fetchCartCount();
+  }, [user]);
 
   const navigation = [
     { name: 'Home', href: '/', icon: HomeIcon },
@@ -90,9 +112,11 @@ const Navbar = () => {
                     className="relative text-gray-600 hover:text-primary p-2"
                   >
                     <ShoppingCartIcon className="h-6 w-6" />
-                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-primary rounded-full">
-                      0
-                    </span>
+                    {cartCount > 0 && (
+                      <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-primary rounded-full">
+                        {cartCount}
+                      </span>
+                    )}
                   </Link>
                   <Profile />
                 </>

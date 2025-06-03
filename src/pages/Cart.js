@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -11,23 +11,19 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchCartItems();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    fetchCartItems();
-  }, [fetchCartItems]);
-
-  const fetchCartItems = async () => {
+  const fetchCartItems = useCallback(async () => {
+    if (!user) return;
+    
     try {
-      const cartDoc = await getDocs(collection(db, 'carts', user.uid, 'items'));
-      const items = cartDoc.docs.map(doc => ({
+      const cartRef = doc(db, 'carts', user.uid);
+      const itemsRef = collection(cartRef, 'items');
+      const itemsSnapshot = await getDocs(itemsRef);
+      
+      const items = itemsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
       setCartItems(items);
     } catch (error) {
       console.error('Error fetching cart:', error);
@@ -35,7 +31,13 @@ const Cart = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchCartItems();
+    }
+  }, [user, fetchCartItems]);
 
   const updateQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;

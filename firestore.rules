@@ -43,14 +43,22 @@ service cloud.firestore {
 
     // Cart collection rules
     match /carts/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId);
+      allow read, write: if isOwner(userId);
+      
+      // Allow access to items subcollection
+      match /items/{itemId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // Wishlist collection rules
     match /wishlists/{userId} {
-      allow read: if isOwner(userId);
-      allow write: if isOwner(userId);
+      allow read, write: if isOwner(userId);
+      
+      // Allow access to items subcollection
+      match /items/{itemId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // Admins collection rules

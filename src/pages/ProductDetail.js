@@ -69,10 +69,15 @@ const ProductDetail = () => {
     }
 
     try {
-      const cartItemRef = doc(db, 'carts', user.uid, 'items', id);
+      const cartRef = doc(db, 'carts', user.uid);
+      const cartItemRef = doc(cartRef, 'items', id);
+      
       await setDoc(cartItemRef, {
-        ...product,
-        quantity,
+        productId: id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: quantity,
         addedAt: new Date().toISOString()
       }, { merge: true });
 
@@ -91,9 +96,14 @@ const ProductDetail = () => {
     }
 
     try {
-      const wishlistItemRef = doc(db, 'wishlists', user.uid, 'items', id);
+      const wishlistRef = doc(db, 'wishlists', user.uid);
+      const wishlistItemRef = doc(wishlistRef, 'items', id);
+      
       await setDoc(wishlistItemRef, {
-        ...product,
+        productId: id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
         addedAt: new Date().toISOString()
       }, { merge: true });
 

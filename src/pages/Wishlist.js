@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -10,19 +10,19 @@ const Wishlist = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchWishlist();
-    }
-  }, [user, fetchWishlist]);
-
-  const fetchWishlist = async () => {
+  const fetchWishlist = useCallback(async () => {
+    if (!user) return;
+    
     try {
-      const wishlistDoc = await getDocs(collection(db, 'wishlists', user.uid, 'items'));
-      const wishlistItems = wishlistDoc.docs.map(doc => ({
+      const wishlistRef = doc(db, 'wishlists', user.uid);
+      const itemsRef = collection(wishlistRef, 'items');
+      const itemsSnapshot = await getDocs(itemsRef);
+      
+      const wishlistItems = itemsSnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
       setWishlist(wishlistItems);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
@@ -30,7 +30,13 @@ const Wishlist = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchWishlist();
+    }
+  }, [user, fetchWishlist]);
 
   const removeFromWishlist = async (productId) => {
     try {
@@ -82,7 +88,7 @@ const Wishlist = () => {
                 <Link to={`/product/${item.id}`}>
                   <h2 className="text-xl font-semibold text-gray-800">{item.name}</h2>
                 </Link>
-                <p className="text-gray-600 mt-2">${item.price}</p>
+                <p className="text-gray-600 mt-2">TZS {parseFloat(item.price).toLocaleString()}</p>
                 <div className="mt-4 flex justify-between">
                   <button
                     onClick={() => removeFromWishlist(item.id)}
