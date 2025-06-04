@@ -11,7 +11,6 @@ import AIAssistant from './components/AIAssistant';
 
 // Pages
 import Home from './pages/Home';
-import ProductDetails from './pages/ProductDetails';
 import Cart from './pages/Cart';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -22,6 +21,8 @@ import Orders from './pages/Orders';
 import Admin from './pages/Admin';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProductDetail from './pages/ProductDetail';
+import Checkout from './pages/Checkout';
+import AdminOrders from './pages/AdminOrders';
 
 function App() {
   return (
@@ -55,9 +56,19 @@ function App() {
                   <Orders />
                 </ProtectedRoute>
               } />
+              <Route path="/checkout" element={
+                <ProtectedRoute>
+                  <Checkout />
+                </ProtectedRoute>
+              } />
               <Route path="/admin" element={
                 <ProtectedRoute adminOnly>
                   <Admin />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/orders" element={
+                <ProtectedRoute adminOnly>
+                  <AdminOrders />
                 </ProtectedRoute>
               } />
               <Route path="/login" element={<Login />} />

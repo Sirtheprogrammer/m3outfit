@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { TrashIcon, MinusIcon, PlusIcon } from '@heroicons/react/24/outline';
 
@@ -10,6 +10,7 @@ const Cart = () => {
   const { user } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const fetchCartItems = useCallback(async () => {
     if (!user) return;
@@ -175,6 +176,7 @@ const Cart = () => {
                   </div>
                 </div>
                 <button
+                  onClick={() => navigate('/checkout')}
                   className="w-full bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors duration-300"
                 >
                   Proceed to Checkout

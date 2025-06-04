@@ -111,7 +111,7 @@ const Products = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">
-          {categoryId ? `TZS{getCategoryName(categoryId)} Products` : 'All Products'}
+          {categoryId ? `${getCategoryName(categoryId)} Products` : 'All Products'}
         </h1>
         <Link
           to="/products"
